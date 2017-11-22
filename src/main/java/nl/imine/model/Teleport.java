@@ -2,9 +2,11 @@ package nl.imine.model;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public class Teleport {
 
+	private UUID teleportId;
 	private List<SpongeLocation> interactLocations;
 	private SpongeLocation destination;
 	private boolean nightVision;
@@ -14,12 +16,21 @@ public class Teleport {
 	public Teleport() {
 	}
 
-	public Teleport(List<SpongeLocation> interactLocations, SpongeLocation destination, boolean nightVision, ItemRequirement itemRequired, String noPermissionMessage) {
+	public Teleport(UUID teleportId, List<SpongeLocation> interactLocations, SpongeLocation destination, boolean nightVision, ItemRequirement itemRequired, String noPermissionMessage) {
+		this.teleportId = teleportId;
 		this.interactLocations = interactLocations;
 		this.destination = destination;
 		this.nightVision = nightVision;
 		this.itemRequired = itemRequired;
 		this.noPermissionMessage = noPermissionMessage;
+	}
+
+	public UUID getTeleportId() {
+		return teleportId;
+	}
+
+	public void setTeleportId(UUID teleportId) {
+		this.teleportId = teleportId;
 	}
 
 	public List<SpongeLocation> getInteractLocations() {

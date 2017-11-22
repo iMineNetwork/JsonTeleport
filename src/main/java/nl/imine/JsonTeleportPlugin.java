@@ -2,9 +2,16 @@ package nl.imine;
 
 import java.io.File;
 
+import nl.imine.command.JsonTeleportCreateCommand;
+import nl.imine.command.JsonTeleportDiscardCommand;
+import nl.imine.command.JsonTeleportFinishCommand;
+import nl.imine.listener.TeleportBuildListener;
+import nl.imine.service.EditingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.GameReloadEvent;
@@ -48,10 +55,12 @@ public class JsonTeleportPlugin {
 	private void startPlugin() {
 		teleportService = new TeleportService(configDir.toPath());
 		if (teleportService.setUpFiles()) {
-//			TeleportManager.TELEPORTS = loader.loadTeleportsFromFile();
-//			TeleportManager.RETURN_TELEPORTS = loader.loadReturnTeleportsFromFile();
 			teleportListener = new TeleportListener(teleportService.getTeleports(), teleportService.getReturnTeleports());
+			EditingService editingService = new EditingService(teleportService);
+			TeleportBuildListener teleportBuildListener = new TeleportBuildListener(editingService);
+			registerCommands(editingService);
 			Sponge.getEventManager().registerListeners(this, teleportListener);
+			Sponge.getEventManager().registerListeners(this, teleportBuildListener);
 		} else {
 			logger.error("Failed setting up config directory. The plugin will not load");
 		}
@@ -62,4 +71,15 @@ public class JsonTeleportPlugin {
 		Sponge.getServer().getOnlinePlayers().forEach(teleportListener::returnPlayer);
 	}
 
+	private void registerCommands(EditingService editingService) {
+
+		CommandSpec baseCommandSpec = CommandSpec.builder()
+				.child(JsonTeleportCreateCommand.commandSpec(editingService), "create", "c")
+				.child(JsonTeleportDiscardCommand.commandSpec(editingService), "discard", "d")
+				.child(JsonTeleportFinishCommand.commandSpec(editingService), "finish", "f")
+				.build();
+
+		Sponge.getGame().getCommandManager().register(this, baseCommandSpec, "jsonteleport",
+				"jtp");
+	}
 }

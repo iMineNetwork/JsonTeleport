@@ -1,107 +1,150 @@
 package nl.imine.service;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spongepowered.api.item.ItemType;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import nl.imine.adapter.ItemTypeDeserializationAdapter;
 import nl.imine.adapter.ItemTypeSerializationAdapter;
 import nl.imine.model.ReturnTeleport;
 import nl.imine.model.Teleport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.spongepowered.api.item.ItemType;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TeleportService {
 
-	private static final Logger logger = LoggerFactory.getLogger(TeleportService.class);
-	private static final String FILE_NAME_TELEPORTS = "teleports.json";
-	private static final String FILE_NAME_RETURN_TELEPORTS = "returnTeleports.json";
-	private static final String FILE_NAME_RETURN_LOCATIONS = "returnLocations.json";
+    private static final Logger logger = LoggerFactory.getLogger(TeleportService.class);
+    private static final String FILE_NAME_TELEPORTS = "teleports.json";
+    private static final String FILE_NAME_RETURN_TELEPORTS = "returnTeleports.json";
+    private static final String FILE_NAME_RETURN_LOCATIONS = "returnLocations.json";
 
-	private final Path teleportsPath;
-	private final Path returnTeleportsPath;
-	private final Path returnLocations;
-	private final ObjectMapper objectMapper;
+    private final Path teleportsPath;
+    private final Path returnTeleportsPath;
+    private final Path returnLocations;
+    private final ObjectMapper objectMapper;
 
-	public TeleportService(Path configFolder) {
-		this.teleportsPath = configFolder.resolve(FILE_NAME_TELEPORTS);
-		this.returnTeleportsPath = configFolder.resolve(FILE_NAME_RETURN_TELEPORTS);
-		this.returnLocations = configFolder.resolve(FILE_NAME_RETURN_LOCATIONS);
-		this.objectMapper = createObjectMapper();
-	}
+    private List<Teleport> teleports;
+    private List<ReturnTeleport> returnTeleports;
 
-	public List<Teleport> getTeleports() {
-		logger.info("Loading teleports");
-		try {
-			return objectMapper.readValue(Files.newInputStream(teleportsPath), new TypeReference<List<Teleport>>() {
-			});
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("An Exception occurred while loading teleports from Json ({}: {})", e.getClass().getSimpleName(), e.getMessage());
-			return Collections.emptyList();
-		}
-	}
+    public TeleportService(Path configFolder) {
+        this.teleportsPath = configFolder.resolve(FILE_NAME_TELEPORTS);
+        this.returnTeleportsPath = configFolder.resolve(FILE_NAME_RETURN_TELEPORTS);
+        this.returnLocations = configFolder.resolve(FILE_NAME_RETURN_LOCATIONS);
+        this.objectMapper = createObjectMapper();
+    }
 
-	public List<ReturnTeleport> getReturnTeleports() {
-		logger.info("Loading return teleports");
-		try {
-			return objectMapper.readValue(Files.newInputStream(returnTeleportsPath), new TypeReference<List<ReturnTeleport>>() {
-			});
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("An Exception occurred while loading returnTeleports from Json ({}: {})", e.getClass().getSimpleName(), e.getMessage());
-			return Collections.emptyList();
-		}
-	}
+    public void addTeleport(Teleport teleport) {
+        teleports.add(teleport);
+        saveTeleports();
+    }
 
-	public boolean setUpFiles() {
-		try {
-			if (!Files.exists(teleportsPath.getParent())) {
-				Files.createDirectories(teleportsPath.getParent());
-			}
+    public void addReturnTeleport(ReturnTeleport teleport) {
+        returnTeleports.add(teleport);
+        saveReturnTeleports();
+    }
 
-			if (!Files.exists(teleportsPath)) {
-				Files.createFile(teleportsPath);
-			}
+    public List<Teleport> getTeleports() {
+        if (teleports == null) {
+            teleports = loadTeleports();
+        }
+        return teleports;
+    }
 
-			if (!Files.exists(returnTeleportsPath)) {
-				Files.createFile(returnTeleportsPath);
-			}
+    public List<ReturnTeleport> getReturnTeleports() {
+        if (returnTeleports == null) {
+            returnTeleports = loadReturnTeleports();
+        }
+        return returnTeleports;
+    }
 
-			if (!Files.exists(returnLocations)) {
-				Files.createFile(returnLocations);
-			}
+    private List<Teleport> loadTeleports() {
+        logger.info("Loading teleports");
+        try {
+            return objectMapper.readValue(Files.newInputStream(teleportsPath), new TypeReference<List<Teleport>>() {
+            });
+        } catch (Exception e) {
+            logger.error("An Exception occurred while loading teleports from Json ({}: {})", e.getClass().getSimpleName(), e.getMessage());
+            return new ArrayList<>();
+        }
+    }
 
-		} catch (IOException ioe) {
-			logger.error("An exception occurred while creating config files ({}: {})", ioe.getClass().getSimpleName(), ioe.getLocalizedMessage());
-			return false;
-		}
-		return true;
-	}
+    private void saveTeleports() {
+        logger.info("Storing teleports");
+        try {
+            Files.write(teleportsPath, objectMapper.writeValueAsBytes(teleports));
+        } catch (IOException e) {
+            logger.error("An Exception occurred while saving teleports to disk ({}: {})", e.getClass().getSimpleName(), e.getMessage());
+        }
+    }
 
-	private ObjectMapper createObjectMapper() {
-		ObjectMapper ret = new ObjectMapper();
-		ret.enable(JsonGenerator.Feature.IGNORE_UNKNOWN);
-		ret.enable(JsonParser.Feature.IGNORE_UNDEFINED);
-		ret.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private List<ReturnTeleport> loadReturnTeleports() {
+        logger.info("Loading return teleports");
+        try {
+            return objectMapper.readValue(Files.newInputStream(returnTeleportsPath), new TypeReference<List<ReturnTeleport>>() {
+            });
+        } catch (Exception e) {
+            logger.error("An Exception occurred while loading returnTeleports from Json ({}: {})", e.getClass().getSimpleName(), e.getMessage());
+            return new ArrayList<>();
+        }
+    }
 
-		SimpleModule module = new SimpleModule();
-		module.addSerializer(ItemType.class, new ItemTypeSerializationAdapter());
-		module.addDeserializer(ItemType.class, new ItemTypeDeserializationAdapter());
-		ret.registerModule(module);
+    private void saveReturnTeleports() {
+        logger.info("Storing teleports");
+        try {
+            Files.write(returnTeleportsPath, objectMapper.writeValueAsBytes(returnTeleports));
+        } catch (IOException e) {
+            logger.error("An Exception occurred while saving returnTeleports to disk ({}: {})", e.getClass().getSimpleName(), e.getMessage());
+        }
+    }
 
-		return ret;
-	}
+    public boolean setUpFiles() {
+        try {
+            if (!Files.exists(teleportsPath.getParent())) {
+                Files.createDirectories(teleportsPath.getParent());
+            }
+
+            if (!Files.exists(teleportsPath)) {
+                Files.createFile(teleportsPath);
+            }
+
+            if (!Files.exists(returnTeleportsPath)) {
+                Files.createFile(returnTeleportsPath);
+            }
+
+            if (!Files.exists(returnLocations)) {
+                Files.createFile(returnLocations);
+            }
+
+        } catch (IOException ioe) {
+            logger.error("An exception occurred while creating config files ({}: {})", ioe.getClass().getSimpleName(), ioe.getLocalizedMessage());
+            return false;
+        }
+        return true;
+    }
+
+    private ObjectMapper createObjectMapper() {
+        ObjectMapper ret = new ObjectMapper();
+        ret.enable(JsonGenerator.Feature.IGNORE_UNKNOWN);
+        ret.enable(JsonParser.Feature.IGNORE_UNDEFINED);
+        ret.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(ItemType.class, new ItemTypeSerializationAdapter());
+        module.addDeserializer(ItemType.class, new ItemTypeDeserializationAdapter());
+        ret.registerModule(module);
+
+        ret.registerModule(new Jdk8Module());
+
+        return ret;
+    }
 }

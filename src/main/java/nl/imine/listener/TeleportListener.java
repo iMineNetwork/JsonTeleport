@@ -86,9 +86,8 @@ public class TeleportListener {
 						if (!oItem.isPresent()) {
 							oItem = player.getItemInHand(HandTypes.OFF_HAND);
 						}
-						teleport(player.getUniqueId(), teleport, oItem);
-
 						playerReturns.add(new PlayerReturn(player, SpongeLocation.fromLocationAndRotation(player.getLocation(), player.getRotation()), teleport.isNightVision()));
+						teleport(player.getUniqueId(), teleport, oItem);
 					}));
 
 			returnTeleports.stream()
@@ -103,10 +102,6 @@ public class TeleportListener {
 	@Include(ClientConnectionEvent.Disconnect.class)
 	public void onPlayerLogout(ClientConnectionEvent evt) {
 		evt.getCause().first(Player.class).ifPresent(this::returnPlayer);
-	}
-
-	public void addPlayerReturn(Player player, SpongeLocation location, boolean nightVision) {
-		playerReturns.add(new PlayerReturn(player, location, nightVision));
 	}
 
 	public void returnPlayer(Player player) {

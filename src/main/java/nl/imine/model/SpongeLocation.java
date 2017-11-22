@@ -37,10 +37,7 @@ public class SpongeLocation {
 
 	public Optional<Location> toLocation() {
 		Optional<World> oWorld = Sponge.getServer().getWorld(world);
-		logger.info("{}", oWorld);
-		Optional<Location> location = oWorld.map(world -> new Location<>(world, x, y, z));
-		logger.info("{}", location);
-		return location;
+		return oWorld.map(world1 -> new Location<>(world1, x, y, z));
 	}
 
 	public Optional<Vector3d> toRotation() {
