@@ -20,6 +20,8 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.Location;
 
+import com.flowpowered.math.vector.Vector3d;
+
 import nl.imine.model.*;
 
 public class TeleportListener {
@@ -111,7 +113,7 @@ public class TeleportListener {
 				.ifPresent(p -> {
 					Player teleportPlayer = p.getPlayer();
 					p.getReturnLocation().toLocation().ifPresent(teleportPlayer::setLocation);
-					p.getReturnLocation().toRotation().ifPresent(teleportPlayer::setRotation);
+					p.getReturnLocation().toRotation().map(rotation -> rotation.add(0, 180, 0)).ifPresent(teleportPlayer::setRotation);
 					if (p.isNightVision()) {
 						removePotionEffectFromPlayer(player, PotionEffectTypes.NIGHT_VISION);
 					}
@@ -144,23 +146,4 @@ public class TeleportListener {
 			logger.info("Teleport for '{}' failed due to not having the required items. Required in hand: ({}) found: ({})", player.toString(), teleport.getItemRequired().map(ItemRequirement::getItemName).orElse(null), (usedItem.orElse(null) == null ? null : usedItem.get().getItem()));
 		}
 	}
-
-	public void returnTeleport(UUID player, ReturnTeleport returnTeleport, Optional<ItemStack> usedItem, Location returnLocation, boolean isReturning) {
-		if (!returnTeleport.getItemRequired().isPresent() || (usedItem.isPresent() && returnTeleport.getItemRequired().get().isMet(usedItem.get()))) {
-			Sponge.getServer().getPlayer(player).ifPresent(p -> {
-				if (isReturning) {
-					returnPlayer(p);
-				} else {
-					returnTeleport.getDestination().toLocation().ifPresent(p::setLocation);
-					returnTeleport.getDestination().toRotation().ifPresent(p::setRotation);
-					playerReturns.add(new PlayerReturn(p, returnTeleport.getDestination(), returnTeleport.isNightVision()));
-				}
-			});
-		} else if (returnTeleport.getNoPermissionMessage().isPresent()) {
-			Sponge.getServer().getPlayer(player).ifPresent(p -> {
-				p.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(returnTeleport.getNoPermissionMessage().get()));
-			});
-		}
-	}
-
 }

@@ -42,7 +42,7 @@ public class SpongeLocation {
 
 	public Optional<Vector3d> toRotation() {
 		if (yaw != 0 || pitch != 0) {
-			return Optional.of(new Vector3d(pitch, yaw, 0));
+			return Optional.of(new Vector3d(yaw, pitch, 0));
 		}
 		return Optional.empty();
 	}

@@ -71,10 +71,10 @@ public class TeleportBuildListener {
         float pitch = 0;
         float yaw = 0;
         if(rotation != null) {
-            pitch = (float) roundNearest(rotation.getY(), 45);
             yaw = (float) roundNearest(rotation.getX(), 45);
+            pitch = (float) roundNearest(rotation.getY(), 45);
         }
-        return new SpongeLocation(roundNearest(location.getX(), 0.5), roundNearest(location.getY(), 0.5), roundNearest(location.getZ(), 0.5), pitch, yaw, location.getExtent().getName());
+        return new SpongeLocation(roundNearest(location.getX(), 0.5), roundNearest(location.getY(), 0.5), roundNearest(location.getZ(), 0.5), yaw, pitch, location.getExtent().getName());
     }
 
     public double roundNearest(double value, double step) {
