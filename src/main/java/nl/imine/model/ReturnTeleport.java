@@ -1,6 +1,7 @@
 package nl.imine.model;
 
 import java.util.List;
+import java.util.UUID;
 
 public class ReturnTeleport extends Teleport {
 
@@ -9,8 +10,8 @@ public class ReturnTeleport extends Teleport {
 	public ReturnTeleport() {
 	}
 
-	public ReturnTeleport(List<SpongeLocation> interactLocations, SpongeLocation destination, boolean nightVision, ItemRequirement itemRequirement, String noPermissionMessage, List<SpongeLocation> returnInteracts) {
-		super(interactLocations, destination, nightVision, itemRequirement, noPermissionMessage);
+	public ReturnTeleport(UUID teleportId, List<SpongeLocation> interactLocations, SpongeLocation destination, boolean nightVision, ItemRequirement itemRequirement, String noPermissionMessage, List<SpongeLocation> returnInteracts) {
+		super(teleportId, interactLocations, destination, nightVision, itemRequirement, noPermissionMessage);
 		this.returnInteracts = returnInteracts;
 	}
 
