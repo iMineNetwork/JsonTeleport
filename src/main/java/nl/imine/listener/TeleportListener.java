@@ -18,9 +18,6 @@ import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-
-import com.flowpowered.math.vector.Vector3i;
 
 import nl.imine.model.*;
 
@@ -61,10 +58,6 @@ public class TeleportListener {
 							.anyMatch(l -> l.toLocation().equals(evt.getTargetBlock().getLocation()))))
 					.findAny()
 					.ifPresent(teleport -> evt.getTargetBlock().getLocation().ifPresent(worldLocation -> {
-						logger.info(String.format("Player '%s' interacted with a teleport on at location (x:%s, y:%s, z:%s)", player.getName(),
-								worldLocation.getX(),
-								worldLocation.getY(),
-								worldLocation.getZ()));
 						Optional<ItemStack> oItem = player.getItemInHand(HandTypes.MAIN_HAND);
 						if (!oItem.isPresent()) {
 							oItem = player.getItemInHand(HandTypes.OFF_HAND);
@@ -79,10 +72,6 @@ public class TeleportListener {
 							.anyMatch(interactLocation -> interactLocation.toLocation().equals(evt.getTargetBlock().getLocation()))))
 					.findAny()
 					.ifPresent(teleport -> evt.getTargetBlock().getLocation().ifPresent(worldLocation -> {
-						logger.info(String.format("Player '%s' interacted with a return teleport on at location (x:%s, y:%s, z:%s)", player.getName(),
-								worldLocation.getX(),
-								worldLocation.getY(),
-								worldLocation.getZ()));
 						Optional<ItemStack> oItem = player.getItemInHand(HandTypes.MAIN_HAND);
 						if (!oItem.isPresent()) {
 							oItem = player.getItemInHand(HandTypes.OFF_HAND);
@@ -155,9 +144,6 @@ public class TeleportListener {
 				} else {
 					removePotionEffectFromPlayer(player, PotionEffectTypes.NIGHT_VISION);
 				}
-				logger.info(String.format("Teleported '%s' to (x: %s, y: %s, z: %s)", playerUUID, teleport.getDestination().toLocation().map(l -> Optional.of(l.getX())).orElseGet(null),
-						teleport.getDestination().toLocation().map(l -> Optional.of(l.getY())).orElseGet(null),
-						teleport.getDestination().toLocation().map(l -> Optional.of(l.getZ())).orElseGet(null)));
 			});
 		} else if (teleport.getNoPermissionMessage().isPresent()) {
 			Sponge.getServer().getPlayer(playerUUID).ifPresent(p -> {
