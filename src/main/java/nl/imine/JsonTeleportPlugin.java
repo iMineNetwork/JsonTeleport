@@ -67,8 +67,8 @@ public class JsonTeleportPlugin {
 	}
 
 	private void stopPlugin() {
-		Sponge.getEventManager().unregisterPluginListeners(this);
 		Sponge.getServer().getOnlinePlayers().forEach(teleportListener::returnPlayer);
+		Sponge.getEventManager().unregisterPluginListeners(this);
 	}
 
 	private void registerCommands(EditingService editingService) {

@@ -5,7 +5,6 @@ import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.PotionEffectData;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -19,8 +18,9 @@ import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
-import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3i;
 
 import nl.imine.model.*;
 
@@ -39,8 +39,7 @@ public class TeleportListener {
 	}
 
 	private static void removePotionEffectFromPlayer(Player player, PotionEffectType type) {
-		Optional<PotionEffectData> oEffectData = player.get(PotionEffectData.class);
-		oEffectData.ifPresent(effectData -> {
+		player.get(PotionEffectData.class).ifPresent(effectData -> {
 			for (Iterator iterator = effectData.effects().iterator(); iterator.hasNext(); ) {
 				PotionEffect effect = (PotionEffect) iterator.next();
 				if (effect.getType().equals(type)) {
@@ -107,43 +106,65 @@ public class TeleportListener {
 	}
 
 	public void returnPlayer(Player player) {
-		playerReturns.stream()
+		Optional<PlayerReturn> oPlayerReturn = playerReturns.stream()
 				.filter(p -> p.getPlayer().equals(player))
-				.findAny()
-				.ifPresent(p -> {
-					Player teleportPlayer = p.getPlayer();
-					p.getReturnLocation().toLocation().ifPresent(teleportPlayer::setLocation);
-					p.getReturnLocation().toRotation().map(rotation -> rotation.add(0, 180, 0)).ifPresent(teleportPlayer::setRotation);
-					if (p.isNightVision()) {
-						removePotionEffectFromPlayer(player, PotionEffectTypes.NIGHT_VISION);
-					}
+				.findAny();
+		if (oPlayerReturn.isPresent()) {
+			PlayerReturn playerReturn = oPlayerReturn.get();
+			Player teleportPlayer = playerReturn.getPlayer();
+			playerReturn.getReturnLocation().toLocation().ifPresent(teleportPlayer::setLocation);
+			playerReturn.getReturnLocation().toRotation().map(rotation -> rotation.add(0, 180, 0)).ifPresent(teleportPlayer::setRotation);
+			player.getOrCreate(PotionEffectData.class).ifPresent(potionEffectData -> {
+				potionEffectData.addElement(PotionEffect.builder().potionType(PotionEffectTypes.INVISIBILITY).amplifier(1)
+						.duration(20 * 2).ambience(true).particles(false).build());
+				potionEffectData.addElement(PotionEffect.builder().potionType(PotionEffectTypes.BLINDNESS).amplifier(1)
+						.duration(20 * 2).ambience(true).particles(false).build());
+				player.offer(potionEffectData);
+			});
+			if (playerReturn.isNightVision()) {
+				removePotionEffectFromPlayer(player, PotionEffectTypes.NIGHT_VISION);
+			}
+		} else {
+			Sponge.getServer().getDefaultWorld().ifPresent(worldProperties -> {
+				Sponge.getServer().getWorld(worldProperties.getUniqueId()).ifPresent(world -> {
+					player.setLocationSafely(new Location<>(world, worldProperties.getSpawnPosition()));
 				});
+			});
+		}
 		playerReturns.removeIf(playerReturn -> playerReturn.getPlayer().equals(player));
 	}
 
-	public void teleport(UUID player, Teleport teleport, Optional<ItemStack> usedItem) {
+	public void teleport(UUID playerUUID, Teleport teleport, Optional<ItemStack> usedItem) {
 		if (!teleport.getItemRequired().isPresent() || (usedItem.isPresent() && teleport.getItemRequired().get().isMet(usedItem.get()))) {
-			Sponge.getServer().getPlayer(player).ifPresent(p -> {
-				teleport.getDestination().toLocation().ifPresent(p::setLocation);
-				teleport.getDestination().toRotation().ifPresent(p::setRotation);
+			Sponge.getServer().getPlayer(playerUUID).ifPresent(player -> {
+				player.getOrCreate(PotionEffectData.class).ifPresent(potionEffectData -> {
+					potionEffectData.addElement(PotionEffect.builder().potionType(PotionEffectTypes.INVISIBILITY).amplifier(1)
+							.duration(20 * 2).ambience(true).particles(false).build());
+					potionEffectData.addElement(PotionEffect.builder().potionType(PotionEffectTypes.BLINDNESS).amplifier(1)
+							.duration(20 * 2).ambience(true).particles(false).build());
+					player.offer(potionEffectData);
+				});
+				teleport.getDestination().toLocation().ifPresent(player::setLocation);
+				teleport.getDestination().toRotation().ifPresent(player::setRotation);
 				if (teleport.isNightVision()) {
-					List<PotionEffect> effects = new ArrayList<>();
-					effects.add(PotionEffect.builder().potionType(PotionEffectTypes.NIGHT_VISION).amplifier(1)
-							.duration(Integer.MAX_VALUE).ambience(true).particles(false).build());
-					p.offer(Keys.POTION_EFFECTS, effects);
+					player.getOrCreate(PotionEffectData.class).ifPresent(potionEffectData -> {
+						potionEffectData.addElement(PotionEffect.builder().potionType(PotionEffectTypes.NIGHT_VISION).amplifier(1)
+								.duration(Integer.MAX_VALUE).ambience(true).particles(false).build());
+						player.offer(potionEffectData);
+					});
 				} else {
-					removePotionEffectFromPlayer(p, PotionEffectTypes.NIGHT_VISION);
+					removePotionEffectFromPlayer(player, PotionEffectTypes.NIGHT_VISION);
 				}
-				logger.info(String.format("Teleported '%s' to (x: %s, y: %s, z: %s)", player, teleport.getDestination().toLocation().map(l -> Optional.of(l.getX())).orElseGet(null),
+				logger.info(String.format("Teleported '%s' to (x: %s, y: %s, z: %s)", playerUUID, teleport.getDestination().toLocation().map(l -> Optional.of(l.getX())).orElseGet(null),
 						teleport.getDestination().toLocation().map(l -> Optional.of(l.getY())).orElseGet(null),
 						teleport.getDestination().toLocation().map(l -> Optional.of(l.getZ())).orElseGet(null)));
 			});
 		} else if (teleport.getNoPermissionMessage().isPresent()) {
-			Sponge.getServer().getPlayer(player).ifPresent(p -> {
+			Sponge.getServer().getPlayer(playerUUID).ifPresent(p -> {
 				p.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(teleport.getNoPermissionMessage().get()));
 			});
 		} else {
-			logger.info("Teleport for '{}' failed due to not having the required items. Required in hand: ({}) found: ({})", player.toString(), teleport.getItemRequired().map(ItemRequirement::getItemName).orElse(null), (usedItem.orElse(null) == null ? null : usedItem.get().getItem()));
+			logger.info("Teleport for '{}' failed due to not having the required items. Required in hand: ({}) found: ({})", playerUUID.toString(), teleport.getItemRequired().map(ItemRequirement::getItemName).orElse(null), (usedItem.orElse(null) == null ? null : usedItem.get().getItem()));
 		}
 	}
 }
