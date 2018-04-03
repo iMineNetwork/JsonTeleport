@@ -105,9 +105,9 @@ public class TeleportListener {
 			playerReturn.getReturnLocation().toLocation().ifPresent(teleportPlayer::setLocation);
 			playerReturn.getReturnLocation().toRotation().map(rotation -> rotation.add(0, 180, 0)).ifPresent(teleportPlayer::setRotation);
 			player.getOrCreate(PotionEffectData.class).ifPresent(potionEffectData -> {
-				potionEffectData.addElement(PotionEffect.builder().potionType(PotionEffectTypes.INVISIBILITY).amplifier(1)
+				potionEffectData.addElement(PotionEffect.builder().potionType(PotionEffectTypes.INVISIBILITY).amplifier(0)
 						.duration(20 * 2).ambience(true).particles(false).build());
-				potionEffectData.addElement(PotionEffect.builder().potionType(PotionEffectTypes.BLINDNESS).amplifier(1)
+				potionEffectData.addElement(PotionEffect.builder().potionType(PotionEffectTypes.BLINDNESS).amplifier(0)
 						.duration(20 * 2).ambience(true).particles(false).build());
 				player.offer(potionEffectData);
 			});
@@ -128,9 +128,9 @@ public class TeleportListener {
 		if (!teleport.getItemRequired().isPresent() || (usedItem.isPresent() && teleport.getItemRequired().get().isMet(usedItem.get()))) {
 			Sponge.getServer().getPlayer(playerUUID).ifPresent(player -> {
 				player.getOrCreate(PotionEffectData.class).ifPresent(potionEffectData -> {
-					potionEffectData.addElement(PotionEffect.builder().potionType(PotionEffectTypes.INVISIBILITY).amplifier(1)
+					potionEffectData.addElement(PotionEffect.builder().potionType(PotionEffectTypes.INVISIBILITY).amplifier(0)
 							.duration(20 * 2).ambience(true).particles(false).build());
-					potionEffectData.addElement(PotionEffect.builder().potionType(PotionEffectTypes.BLINDNESS).amplifier(1)
+					potionEffectData.addElement(PotionEffect.builder().potionType(PotionEffectTypes.BLINDNESS).amplifier(0)
 							.duration(20 * 2).ambience(true).particles(false).build());
 					player.offer(potionEffectData);
 				});
@@ -138,7 +138,7 @@ public class TeleportListener {
 				teleport.getDestination().toRotation().ifPresent(player::setRotation);
 				if (teleport.isNightVision()) {
 					player.getOrCreate(PotionEffectData.class).ifPresent(potionEffectData -> {
-						potionEffectData.addElement(PotionEffect.builder().potionType(PotionEffectTypes.NIGHT_VISION).amplifier(1)
+						potionEffectData.addElement(PotionEffect.builder().potionType(PotionEffectTypes.NIGHT_VISION).amplifier(0)
 								.duration(Integer.MAX_VALUE).ambience(true).particles(false).build());
 						player.offer(potionEffectData);
 					});
