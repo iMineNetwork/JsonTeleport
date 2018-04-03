@@ -84,7 +84,7 @@ public class EditingService {
 
     private void setTeleportItemRequiredPlayerCurrentHand(Player player, Teleport teleport) {
         player.getItemInHand(HandTypes.MAIN_HAND).ifPresent(itemStack -> {
-            String requiredName = itemStack.get(Keys.DISPLAY_NAME).map(Text::toString).orElse(null);
+            String requiredName = itemStack.get(Keys.DISPLAY_NAME).map(Text::toPlain).orElse(null);
             Short itemData = itemStack.get(Keys.ITEM_DURABILITY).map(integer -> Short.valueOf(String.valueOf(integer))).orElse(null);
             teleport.setItemRequired(new ItemRequirement(itemStack.getItem(), itemData, requiredName));
         });
