@@ -56,7 +56,7 @@ public class EditingService {
                 if (itemRequired != null && itemRequired) {
                     setTeleportItemRequiredPlayerCurrentHand(player, currentEdit);
                 }
-                if(noPermissionMessage != null) {
+                if (noPermissionMessage != null) {
                     currentEdit.setNoPermissionMessage(noPermissionMessage);
                 }
                 if (!(currentEdit instanceof ReturnTeleport)) {
@@ -85,7 +85,7 @@ public class EditingService {
     private void setTeleportItemRequiredPlayerCurrentHand(Player player, Teleport teleport) {
         player.getItemInHand(HandTypes.MAIN_HAND).ifPresent(itemStack -> {
             String requiredName = itemStack.get(Keys.DISPLAY_NAME).map(Text::toString).orElse(null);
-            Short itemData = itemStack.get(Keys.ITEM_DURABILITY).map(integer -> Short.valueOf(String.valueOf(integer))).orElseGet(null);
+            Short itemData = itemStack.get(Keys.ITEM_DURABILITY).map(integer -> Short.valueOf(String.valueOf(integer))).orElse(null);
             teleport.setItemRequired(new ItemRequirement(itemStack.getItem(), itemData, requiredName));
         });
     }
