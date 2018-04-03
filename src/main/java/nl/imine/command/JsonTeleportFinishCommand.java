@@ -28,7 +28,7 @@ public class JsonTeleportFinishCommand implements CommandExecutor {
         return CommandSpec.builder()
                 .arguments(GenericArguments.bool(Text.of(NIGHT_VISION_ARGUMENT_KEY)),
                         GenericArguments.bool(Text.of(REQUIRES_ITEM_ARGUMENT_KEY)),
-                        GenericArguments.remainingJoinedStrings(Text.of(NO_PERMISSION_ARGUMENT_KEY)))
+                        GenericArguments.optional(GenericArguments.remainingJoinedStrings(Text.of(NO_PERMISSION_ARGUMENT_KEY))))
                 .executor(new JsonTeleportFinishCommand(editingService))
                 .description(Text.of("Finish the current edit and save it to disk"))
                 .extendedDescription(Text.of("Finalizes the current edit by gathering the last data such as NightVision, Item Requirements or NoPermission messages"))
