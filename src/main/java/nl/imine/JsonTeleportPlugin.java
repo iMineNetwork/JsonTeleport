@@ -5,6 +5,7 @@ import java.io.File;
 import nl.imine.command.JsonTeleportCreateCommand;
 import nl.imine.command.JsonTeleportDiscardCommand;
 import nl.imine.command.JsonTeleportFinishCommand;
+import nl.imine.component.InteractRevealer;
 import nl.imine.listener.TeleportBuildListener;
 import nl.imine.service.EditingService;
 import org.slf4j.Logger;
@@ -58,6 +59,8 @@ public class JsonTeleportPlugin {
 			teleportListener = new TeleportListener(teleportService.getTeleports(), teleportService.getReturnTeleports());
 			EditingService editingService = new EditingService(teleportService);
 			TeleportBuildListener teleportBuildListener = new TeleportBuildListener(editingService);
+			InteractRevealer interactRevealer = new InteractRevealer(teleportService);
+			interactRevealer.init(this);
 			registerCommands(editingService);
 			Sponge.getEventManager().registerListeners(this, teleportListener);
 			Sponge.getEventManager().registerListeners(this, teleportBuildListener);
