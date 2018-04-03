@@ -2,6 +2,8 @@ package nl.imine.listener;
 
 import java.util.*;
 
+import com.pixelmonmod.pixelmon.api.dialogue.Dialogue;
+import net.minecraft.entity.player.EntityPlayerMP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Sponge;
@@ -16,7 +18,6 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.filter.type.Include;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.Location;
 
 import nl.imine.model.*;
@@ -147,7 +148,8 @@ public class TeleportListener {
 			});
 		} else if (teleport.getNoPermissionMessage().isPresent()) {
 			Sponge.getServer().getPlayer(playerUUID).ifPresent(p -> {
-				p.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(teleport.getNoPermissionMessage().get()));
+				Dialogue dialogue = Dialogue.builder().setText(teleport.getNoPermissionMessage().get()).build();
+				Dialogue.setPlayerDialogueData((EntityPlayerMP) p, new ArrayList<>(Collections.singleton(dialogue)), true);
 			});
 		} else {
 			logger.info("Teleport for '{}' failed due to not having the required items. Required in hand: ({}) found: ({})", playerUUID.toString(), teleport.getItemRequired().map(ItemRequirement::getItemName).orElse(null), (usedItem.orElse(null) == null ? null : usedItem.get().getItem()));
