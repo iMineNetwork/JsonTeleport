@@ -114,12 +114,6 @@ public class TeleportListener {
 			if (playerReturn.isNightVision()) {
 				removePotionEffectFromPlayer(player, PotionEffectTypes.NIGHT_VISION);
 			}
-		} else {
-			Sponge.getServer().getDefaultWorld().ifPresent(worldProperties -> {
-				Sponge.getServer().getWorld(worldProperties.getUniqueId()).ifPresent(world -> {
-					player.setLocationSafely(new Location<>(world, worldProperties.getSpawnPosition()));
-				});
-			});
 		}
 		playerReturns.removeIf(playerReturn -> playerReturn.getPlayer().equals(player));
 	}
