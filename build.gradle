@@ -41,7 +41,7 @@ repositories {
 }
 
 dependencies {
-    compile name: 'Pixelmon-1.12.2-6.2.1-universal'
+    compile name: 'Pixelmon-1.12.2-6.3.1-server'
     compile group: 'org.spongepowered', name: 'spongeapi', version: '5.0.0'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.8.9'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.9'

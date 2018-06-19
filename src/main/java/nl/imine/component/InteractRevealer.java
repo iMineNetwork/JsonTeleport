@@ -1,26 +1,35 @@
 package nl.imine.component;
 
 import nl.imine.model.SpongeLocation;
-import nl.imine.model.Teleport;
 import nl.imine.service.TeleportService;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.effect.particle.ParticleEffect;
-import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.world.Chunk;
 
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class InteractRevealer {
 
     private final TeleportService teleportService;
+    private List<SpongeLocation> allInteracts;
 
     public InteractRevealer(TeleportService teleportService) {
         this.teleportService = teleportService;
+        this.allInteracts = Collections.emptyList();
     }
 
     public void init(Object plugin) {
+        Stream<SpongeLocation> teleportLocations = teleportService.getTeleports().stream().flatMap(teleport -> teleport.getInteractLocations().stream());
+        Stream<SpongeLocation> returnTeleportLocations = teleportService.getReturnTeleports().stream().flatMap(teleport -> teleport.getInteractLocations().stream());
+        Stream<SpongeLocation> returnInteractLocations = teleportService.getReturnTeleports().stream().flatMap(teleport -> teleport.getReturnInteracts().stream());
+        Stream<SpongeLocation> teleportAndReturnTeleportStream = Stream.concat(teleportLocations, returnTeleportLocations);
+        allInteracts = Stream.concat(teleportAndReturnTeleportStream, returnInteractLocations).collect(Collectors.toList());
+
         Sponge.getScheduler().createTaskBuilder()
                 .intervalTicks(5)
                 .execute(new Revealer())
@@ -31,12 +40,6 @@ public class InteractRevealer {
 
         @Override
         public void run() {
-            Stream<SpongeLocation> teleportLocations = teleportService.getTeleports().stream().flatMap(teleport -> teleport.getInteractLocations().stream());
-            Stream<SpongeLocation> returnTeleportLocations = teleportService.getReturnTeleports().stream().flatMap(teleport -> teleport.getInteractLocations().stream());
-            Stream<SpongeLocation> returnInteractLocations = teleportService.getReturnTeleports().stream().flatMap(teleport -> teleport.getReturnInteracts().stream());
-
-            Stream<SpongeLocation> allInteracts = Stream.concat(teleportLocations, returnTeleportLocations);
-            allInteracts = Stream.concat(allInteracts, returnInteractLocations);
             allInteracts.forEach(location -> {
                 Sponge.getServer().getWorld(location.getWorld()).ifPresent(world ->
                         location.toLocation()
