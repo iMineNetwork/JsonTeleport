@@ -1,5 +1,7 @@
 package nl.imine.model;
 
+import nl.imine.vision.VisionType;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -9,18 +11,18 @@ public class Teleport {
 	private UUID teleportId;
 	private List<SpongeLocation> interactLocations;
 	private SpongeLocation destination;
-	private boolean nightVision;
-	private ItemRequirement itemRequired;
+	private VisionType visionType;
+	private String itemRequired;
 	private String noPermissionMessage;
 
 	public Teleport() {
 	}
 
-	public Teleport(UUID teleportId, List<SpongeLocation> interactLocations, SpongeLocation destination, boolean nightVision, ItemRequirement itemRequired, String noPermissionMessage) {
+	public Teleport(UUID teleportId, List<SpongeLocation> interactLocations, SpongeLocation destination, VisionType visionType, String itemRequired, String noPermissionMessage) {
 		this.teleportId = teleportId;
 		this.interactLocations = interactLocations;
 		this.destination = destination;
-		this.nightVision = nightVision;
+		this.visionType = visionType;
 		this.itemRequired = itemRequired;
 		this.noPermissionMessage = noPermissionMessage;
 	}
@@ -49,19 +51,19 @@ public class Teleport {
 		this.destination = destination;
 	}
 
-	public boolean isNightVision() {
-		return nightVision;
+	public VisionType getVisionType() {
+		return visionType;
 	}
 
-	public void setNightVision(boolean nightVision) {
-		this.nightVision = nightVision;
+	public void setVisionType(VisionType visionType) {
+		this.visionType = visionType;
 	}
 
-	public Optional<ItemRequirement> getItemRequired() {
+	public Optional<String> getItemRequired() {
 		return Optional.ofNullable(itemRequired);
 	}
 
-	public void setItemRequired(ItemRequirement itemRequired) {
+	public void setItemRequired(String itemRequired) {
 		this.itemRequired = itemRequired;
 	}
 
@@ -76,10 +78,11 @@ public class Teleport {
 	@Override
 	public String toString() {
 		return "Teleport{" +
-				"interactLocations=" + interactLocations +
+				"teleportId=" + teleportId +
+				", interactLocations=" + interactLocations +
 				", destination=" + destination +
-				", nightVision=" + nightVision +
-				", itemRequired=" + itemRequired +
+				", visionType=" + visionType +
+				", itemRequired='" + itemRequired + '\'' +
 				", noPermissionMessage='" + noPermissionMessage + '\'' +
 				'}';
 	}

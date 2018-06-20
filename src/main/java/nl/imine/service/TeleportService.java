@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.spongepowered.api.item.ItemType;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -69,8 +70,8 @@ public class TeleportService {
 
     private List<Teleport> loadTeleports() {
         logger.info("Loading teleports");
-        try {
-            return objectMapper.readValue(Files.newInputStream(teleportsPath), new TypeReference<List<Teleport>>() {
+        try (InputStream inputStream = Files.newInputStream(teleportsPath)){
+            return objectMapper.readValue(inputStream, new TypeReference<List<Teleport>>() {
             });
         } catch (Exception e) {
             logger.error("An Exception occurred while loading teleports from Json ({}: {})", e.getClass().getSimpleName(), e.getMessage());
@@ -89,8 +90,8 @@ public class TeleportService {
 
     private List<ReturnTeleport> loadReturnTeleports() {
         logger.info("Loading return teleports");
-        try {
-            return objectMapper.readValue(Files.newInputStream(returnTeleportsPath), new TypeReference<List<ReturnTeleport>>() {
+        try (InputStream inputStream = Files.newInputStream(returnTeleportsPath)){
+            return objectMapper.readValue(inputStream, new TypeReference<List<ReturnTeleport>>() {
             });
         } catch (Exception e) {
             logger.error("An Exception occurred while loading returnTeleports from Json ({}: {})", e.getClass().getSimpleName(), e.getMessage());
@@ -109,19 +110,19 @@ public class TeleportService {
 
     public boolean setUpFiles() {
         try {
-            if (!Files.exists(teleportsPath.getParent())) {
+            if (!teleportsPath.getParent().toFile().exists()) {
                 Files.createDirectories(teleportsPath.getParent());
             }
 
-            if (!Files.exists(teleportsPath)) {
+            if (!teleportsPath.toFile().exists()) {
                 Files.createFile(teleportsPath);
             }
 
-            if (!Files.exists(returnTeleportsPath)) {
+            if (!returnTeleportsPath.toFile().exists()) {
                 Files.createFile(returnTeleportsPath);
             }
 
-            if (!Files.exists(returnLocations)) {
+            if (!returnLocations.toFile().exists()) {
                 Files.createFile(returnLocations);
             }
 

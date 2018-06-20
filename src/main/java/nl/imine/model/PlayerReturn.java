@@ -1,17 +1,18 @@
 package nl.imine.model;
 
+import nl.imine.vision.VisionType;
 import org.spongepowered.api.entity.living.player.Player;
 
 public class PlayerReturn {
 
 	private final Player player;
 	private final SpongeLocation location;
-	private final boolean nightVision;
+	private final VisionType visionType;
 
-	public PlayerReturn(Player player, SpongeLocation location, boolean nightVision) {
+	public PlayerReturn(Player player, SpongeLocation location, VisionType visionType) {
 		this.player = player;
 		this.location = location;
-		this.nightVision = nightVision;
+		this.visionType = visionType;
 	}
 
 	public Player getPlayer() {
@@ -22,7 +23,7 @@ public class PlayerReturn {
 		return location;
 	}
 
-	public boolean isNightVision() {
-		return nightVision;
+	public VisionType getVisionType() {
+		return visionType;
 	}
 }

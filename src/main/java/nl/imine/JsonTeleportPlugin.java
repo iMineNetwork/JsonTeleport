@@ -1,17 +1,17 @@
 package nl.imine;
 
-import java.io.File;
-
+import com.google.inject.Inject;
 import nl.imine.command.JsonTeleportCreateCommand;
 import nl.imine.command.JsonTeleportDiscardCommand;
 import nl.imine.command.JsonTeleportFinishCommand;
 import nl.imine.component.InteractRevealer;
 import nl.imine.listener.TeleportBuildListener;
+import nl.imine.listener.TeleportListener;
 import nl.imine.service.EditingService;
+import nl.imine.service.TeleportService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
@@ -20,17 +20,13 @@ import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingEvent;
 import org.spongepowered.api.plugin.Plugin;
 
-import com.google.inject.Inject;
-
-import nl.imine.listener.TeleportListener;
-import nl.imine.service.TeleportService;
+import java.io.File;
 
 @Plugin(id = "jsonteleport", name = "Json Teleport", version = "1.0")
 public class JsonTeleportPlugin {
 
 	private static final Logger logger = LoggerFactory.getLogger(JsonTeleportPlugin.class);
 
-	private TeleportService teleportService;
 	private TeleportListener teleportListener;
 
 	@Inject
@@ -54,7 +50,7 @@ public class JsonTeleportPlugin {
 	}
 
 	private void startPlugin() {
-		teleportService = new TeleportService(configDir.toPath());
+		TeleportService teleportService = new TeleportService(configDir.toPath());
 		if (teleportService.setUpFiles()) {
 			teleportListener = new TeleportListener(teleportService.getTeleports(), teleportService.getReturnTeleports());
 			EditingService editingService = new EditingService(teleportService);

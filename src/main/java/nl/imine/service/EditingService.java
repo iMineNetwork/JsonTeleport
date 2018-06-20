@@ -3,6 +3,7 @@ package nl.imine.service;
 import nl.imine.model.ItemRequirement;
 import nl.imine.model.ReturnTeleport;
 import nl.imine.model.Teleport;
+import nl.imine.vision.VisionType;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
@@ -46,15 +47,15 @@ public class EditingService {
         }
     }
 
-    public void finishEdit(Player player, Boolean nightVision, Boolean itemRequired, String noPermissionMessage) {
+    public void finishEdit(Player player, VisionType visionType, String itemRequired, String noPermissionMessage) {
         if (currentEdits.containsKey(player.getUniqueId())) {
             Teleport currentEdit = currentEdits.get(player.getUniqueId());
             if (isTeleportFinished(currentEdit)) {
-                if (nightVision != null) {
-                    currentEdit.setNightVision(nightVision);
+                if (visionType != null) {
+                    currentEdit.setVisionType(visionType);
                 }
-                if (itemRequired != null && itemRequired) {
-                    setTeleportItemRequiredPlayerCurrentHand(player, currentEdit);
+                if (itemRequired != null) {
+                    setTeleportItemRequired(currentEdit, itemRequired);
                 }
                 if (noPermissionMessage != null) {
                     currentEdit.setNoPermissionMessage(noPermissionMessage);
@@ -66,7 +67,7 @@ public class EditingService {
                 }
                 currentEdits.remove(player.getUniqueId());
                 player.sendMessage(Text.builder("Storing new teleport with the following properties: ").color(TextColors.GREEN).build());
-                player.sendMessage(Text.builder(String.format("\tNightvision: %s", currentEdit.isNightVision())).color(TextColors.GREEN).build());
+                player.sendMessage(Text.builder(String.format("\tVisionType: %s", currentEdit.getVisionType())).color(TextColors.GREEN).build());
                 player.sendMessage(Text.builder(String.format("\tItemRequired: %s", currentEdit.getItemRequired().isPresent())).color(TextColors.GREEN).build());
                 player.sendMessage(Text.builder(String.format("\tNo Permission message: %s", currentEdit.getNoPermissionMessage().orElse("None"))).color(TextColors.GREEN).build());
             } else {
@@ -77,17 +78,13 @@ public class EditingService {
         }
     }
 
+    private void setTeleportItemRequired(Teleport currentEdit, String itemRequired) {
+        currentEdit.setItemRequired(itemRequired);
+    }
+
     public void discardEdit(Player player) {
         player.sendMessage(Text.builder("Discarding current edit").color(TextColors.RED).build());
         currentEdits.remove(player.getUniqueId());
-    }
-
-    private void setTeleportItemRequiredPlayerCurrentHand(Player player, Teleport teleport) {
-        player.getItemInHand(HandTypes.MAIN_HAND).ifPresent(itemStack -> {
-            String requiredName = itemStack.get(Keys.DISPLAY_NAME).map(Text::toPlain).orElse(null);
-            Short itemData = itemStack.get(Keys.ITEM_DURABILITY).map(integer -> Short.valueOf(String.valueOf(integer))).orElse(null);
-            teleport.setItemRequired(new ItemRequirement(itemStack.getItem(), itemData, requiredName));
-        });
     }
 
     private boolean isTeleportFinished(Teleport teleport) {
