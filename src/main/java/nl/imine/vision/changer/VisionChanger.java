@@ -26,7 +26,7 @@ public abstract class VisionChanger {
                     PotionEffect.builder()
                             .potionType(potionEffectType)
                             .amplifier(0)
-                            .duration(20 * 2)
+                            .duration(Integer.MAX_VALUE)
                             .ambience(true)
                             .particles(false)
                             .build()

@@ -22,7 +22,7 @@ import org.spongepowered.api.plugin.Plugin;
 
 import java.io.File;
 
-@Plugin(id = "jsonteleport", name = "Json Teleport", version = "1.0")
+@Plugin(id = "jsonteleport", name = "Json Teleport", version = "1.0", description = "Configureable warps")
 public class JsonTeleportPlugin {
 
 	private static final Logger logger = LoggerFactory.getLogger(JsonTeleportPlugin.class);
